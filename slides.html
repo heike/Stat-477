@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Modelling Just Noticeable Differences in Barcharts - An Example Analysis</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Heike Hofmann" />
+    <script src="libs/header-attrs/header-attrs.js"></script>
+    <link href="libs/remark-css/default.css" rel="stylesheet" />
+    <link href="libs/remark-css/default-fonts.css" rel="stylesheet" />
+    <link href="libs/panelset/panelset.css" rel="stylesheet" />
+    <script src="libs/panelset/panelset.js"></script>
+    <link href="libs/tile-view/tile-view.css" rel="stylesheet" />
+    <script src="libs/tile-view/tile-view.js"></script>
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Modelling Just Noticeable Differences in Barcharts - An Example Analysis
+### Heike Hofmann
+
+---
+
+
+
+
+## Outline
+
+- Motivation / Background
+
+- Models for one participant
+
+- One Model for all participants
+
+---
+
+# Just Noticeable Differences?
+
+![](images/jnd-header.png)
+&lt;span&gt;&lt;left&gt;
+M. Lu et al., "Modeling Just Noticeable Differences in Charts," in IEEE Transactions on Visualization and Computer Graphics, vol. 28, no. 1, pp. 718-726, Jan. 2022, doi: 10.1109/TVCG.2021.3114874.
+&lt;/left&gt;&lt;/span&gt;
+---
+
+## Just noticeable differences
+
+Idea goes back to early cognitive findings of the late 1800s and early 1900s
+
+Just noticeable difference is 'smallest change of a stimulus' that is observable (to about 50% of the population). 
+
+
+Weber-Fechner 'Law': 
+
+&gt; *"Simple differential sensitivity is inversely proportional to the size of the components of the difference; &lt;br&gt;
+relative differential sensitivity remains the same regardless of size."*
+
+Weber-Fechner:
+
+`\(const = \frac{\Delta I}{I}\)` independent of intensity `\(I\)` (or at least wide ranges of `\(I\)`) 
+
+Applicability under discussion; research in JNDs and what affects it, remains.
+
+---
+
+# A Study
+
+Is B larger than A? 
+
+.pull-left[
+
+![](slides_files/figure-html/unnamed-chunk-1-1.png)&lt;!-- --&gt;
+]
+
+.pull-right[
+
+Height of bar A is called intensity `\(I\)`
+
+Distance between bars A and B is called `\(d\)`
+
+Height of bar B is varied for the experiment.
+
+]
+
+--
+
+![](slides_files/figure-html/unnamed-chunk-2-1.png)&lt;!-- --&gt;
+
+---
+
+## Participant 8_61
+
+
+
+
+
+.panelset[
+.panel[.panel-name[Data]
+
+
+```r
+id8_91 %&gt;% select(`height B`, Total, Yes, distance, intensity)
+```
+
+```
+##    height B Total Yes distance intensity
+## 1    48.000    10   0        9        50
+## 2    48.475    10   0        9        50
+## 3    48.950    10   0        9        50
+## 4    49.425    10   0        9        50
+## 5    49.900    10   3        9        50
+## 6    50.100    10   7        9        50
+## 7    50.575    10  10        9        50
+## 8    51.050    10  10        9        50
+## 9    51.525    10  10        9        50
+## 10   52.000    10  10        9        50
+```
+
+Looks almost too perfect to be true? 🤔
+
+]
+
+.panel[.panel-name[Logistic regression]
+
+
+```r
+logr8_91 &lt;- glm(cbind(Yes, Total-Yes)~`height B`, 
+                data = id8_91, family = binomial())
+summary(logr8_91)
+```
+
+```
+## 
+## Call:
+## glm(formula = cbind(Yes, Total - Yes) ~ `height B`, family = binomial(), 
+##     data = id8_91)
+## 
+## Deviance Residuals: 
+##      Min        1Q    Median        3Q       Max  
+## -0.28212  -0.02236   0.00000   0.02236   0.28212  
+## 
+## Coefficients:
+##             Estimate Std. Error z value Pr(&gt;|z|)  
+*## (Intercept) -480.397    192.988  -2.489   0.0128 *
+*## `height B`     9.608      3.860   2.489   0.0128 *
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 114.19486  on 9  degrees of freedom
+## Residual deviance:   0.21414  on 8  degrees of freedom
+## AIC: 9.4987
+## 
+## Number of Fisher Scoring iterations: 9
+```
+]
+
+.panel[.panel-name[Predictions]
+
+![](slides_files/figure-html/unnamed-chunk-6-1.png)&lt;!-- --&gt;
+]
+
+.panel[.panel-name[PSE]
+For  logit `\(P (Y = y) = aX + b\)`
+
+'Half way point' `\(X_{50}\)` called **Point of Subjective Equality** (PSE):
+
+`\(aX_{50} + b = logit (0.50) = 0\)`
+
+`\(X_{50} = -b/a\)`
+
+
+Here: `\(X_{50} = - \frac{-480.397}{9.608} = 50.00\)`
+
+
+Slope in `\(X_{50}\)`: `\(a/4 = 9.608/4 = 2.402\)`
+]
+
+.panel[.panel-name[JND]
+For  logit `\(P (Y = y) = aX + b\)`
+
+the Just Noticeable Difference (JND) `\(\Delta X\)`  is defined as
+the differences in `\(X\)` for prediction values of 0.75 and 0.5:
+
+
+`\(\Delta X := X_{75} - X_{50} = \frac{\log(3)}{a}\)`
+
+For participant 8_61: `\(\Delta X = \log(3)/9.608 = 0.1143\)` (pixels)
+]
+]
+
+
+
+---
+
+## Participant 8_61 (distance 93)
+
+
+
+
+
+.panelset[
+.panel[.panel-name[Data]
+
+
+```r
+id8_91 %&gt;% select(`height B`, Total, Yes, distance, intensity)
+```
+
+```
+##    height B Total Yes distance intensity
+## 1    45.000    10   0       93        50
+## 2    46.125    10   0       93        50
+## 3    47.250    10   0       93        50
+## 4    48.375    10   0       93        50
+## 5    49.500    10   3       93        50
+## 6    50.500    10   9       93        50
+## 7    51.625    10  10       93        50
+## 8    52.750    10   9       93        50
+## 9    53.875    10  10       93        50
+## 10   55.000    10  10       93        50
+```
+
+Still pretty perfect.
+
+]
+
+.panel[.panel-name[Logistic regression]
+
+
+```r
+logr8_91 &lt;- glm(cbind(Yes, Total-Yes)~`height B`, 
+                data = id8_91, family = binomial())
+summary(logr8_91)
+```
+
+```
+## 
+## Call:
+## glm(formula = cbind(Yes, Total - Yes) ~ `height B`, family = binomial(), 
+##     data = id8_91)
+## 
+## Deviance Residuals: 
+##      Min        1Q    Median        3Q       Max  
+## -2.06400  -0.32420  -0.08941   0.09105   1.16323  
+## 
+## Coefficients:
+##             Estimate Std. Error z value Pr(&gt;|z|)    
+*## (Intercept) -93.1662    23.6166  -3.945 7.98e-05 ***
+*## `height B`    1.8673     0.4732   3.946 7.94e-05 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 113.3688  on 9  degrees of freedom
+## Residual deviance:   7.7293  on 8  degrees of freedom
+## AIC: 18.165
+## 
+## Number of Fisher Scoring iterations: 7
+```
+]
+
+.panel[.panel-name[Predictions]
+
+![](slides_files/figure-html/unnamed-chunk-10-1.png)&lt;!-- --&gt;
+]
+
+.panel[.panel-name[PSE]
+For  logit `\(P (Y = y) = aX + b\)`
+
+'Half way point' `\(X_{50}\)` called **Point of Subjective Equality** (PSE):
+
+`\(aX_{50} + b = logit (0.50) = 0\)`
+
+`\(X_{50} = -b/a\)`
+
+
+Here: `\(X_{50} = - \frac{-93.166}{1.867} = 49.90\)`
+
+Slope in `\(X_{50}\)`: `\(a/4 = 1.867/4 = 0.46675\)` 
+]
+
+.panel[.panel-name[JND]
+For  logit `\(P (Y = y) = aX + b\)`
+
+the Just Noticeable Difference (JND) `\(\Delta X\)`  is defined as
+the differences in `\(X\)` for prediction values of 0.75 and 0.5:
+
+
+`\(\Delta X := X_{75} - X_{50} = \frac{\log(3)}{a}\)`
+
+For participant 8_61: `\(\Delta X = \log(3)/1.867277 = 0.5883\)` (pixels)
+]
+]
+
+
+---
+
+## Participant 8_61 (all distances)
+
+
+
+
+
+.panelset[
+.panel[.panel-name[Data]
+
+
+```r
+id8_91 %&gt;% group_by(distance) %&gt;% summarize(`Number of responses` = sum(Total))
+```
+
+```
+## # A tibble: 5 × 2
+##   distance `Number of responses`
+##      &lt;int&gt;                 &lt;int&gt;
+## 1        9                   100
+## 2       93                   100
+## 3      177                   100
+## 4      261                   100
+## 5      345                   101
+```
+
+All distances now for participant 8_61 at this intensity.
+]
+
+.panel[.panel-name[Distance as Factor]
+
+```r
+logr8_91_dfactor &lt;- glm(cbind(Yes, Total-Yes) ~ 
+  factor(distance)-1 + `height B`:factor(distance), 
+  data = id8_91, family = binomial())
+```
+
+![](slides_files/figure-html/unnamed-chunk-14-1.png)&lt;!-- --&gt;
+
+]
+
+.panel[.panel-name[Look at Estimates]
+
+10 parameters: intercept and slope for each distance level
+
+
+
+![](slides_files/figure-html/unnamed-chunk-16-1.png)&lt;!-- --&gt;
+]
+
+.panel[.panel-name[Reparameterize]
+
+
+```r
+logr8_91_dfactor2 &lt;- glm(cbind(Yes, Total-Yes) ~ 
+  - 1 + I(`height B`-intensity):factor(distance) , 
+  data = id8_91, family = binomial())
+```
+
+![](slides_files/figure-html/unnamed-chunk-18-1.png)&lt;!-- --&gt;
+]
+
+.panel[.panel-name[Model comparison]
+
+
+```r
+anova(logr8_91_dfactor2, logr8_91_dfactor)
+```
+
+```
+## Analysis of Deviance Table
+## 
+## Model 1: cbind(Yes, Total - Yes) ~ -1 + I(`height B` - intensity):factor(distance)
+## Model 2: cbind(Yes, Total - Yes) ~ factor(distance) - 1 + `height B`:factor(distance)
+##   Resid. Df Resid. Dev Df Deviance
+## 1        45     28.066            
+## 2        40     27.492  5  0.57385
+```
+]
+
+]
+
+---
+
+## Participant 8_61 (all distances, intensity = 50)
+ 
+.panelset[
+
+.panel[.panel-name[Distance as factor]
+
+5 parameters: slope for each distance level
+
+
+
+![](slides_files/figure-html/unnamed-chunk-21-1.png)&lt;!-- --&gt;
+
+]
+
+.panel[.panel-name[Distance as numeric]
+
+
+```r
+logr8_91_dnum &lt;- glm(
+  cbind(Yes, Total-Yes) ~ -1 + signal + signal:log(distance), 
+  data = id8_91, family = binomial())
+```
+
+
+```r
+Coefficients:
+                     Estimate Std. Error z value Pr(&gt;|z|)    
+signal                 6.6533     1.1770   5.653 1.58e-08 ***
+signal:log(distance)  -1.0616     0.2062  -5.147 2.65e-07 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+```
+]
+
+.panel[.panel-name[Model comparison]
+
+
+```r
+anova(logr8_91_dnum, logr8_91_dfactor2)
+```
+
+```
+## Analysis of Deviance Table
+## 
+## Model 1: cbind(Yes, Total - Yes) ~ -1 + signal + signal:log(distance)
+## Model 2: cbind(Yes, Total - Yes) ~ -1 + I(`height B` - intensity):factor(distance)
+##   Resid. Df Resid. Dev Df Deviance
+## 1        48     35.388            
+## 2        45     28.066  3   7.3214
+```
+]
+
+.panel[.panel-name[Predictions]
+
+![](slides_files/figure-html/unnamed-chunk-26-1.png)&lt;!-- --&gt;
+
+Half-way point fixed to be at 0.
+
+Difference in height between B and A is spotted easier if bars are closer together.
+]
+
+]
+
+---
+
+## Still Participant 8_91 ... now all distances and intensities
+
+.panelset[
+
+.panel[.panel-name[Data]
+
+
+
+![](slides_files/figure-html/unnamed-chunk-28-1.png)&lt;!-- --&gt;
+Intensity (height of bar A) does not seem to have a strong effect on height assessment of B.
+]
+
+.panel[.panel-name[Model]
+
+```r
+logr8_91_dnum_inum &lt;- glm(
+  cbind(Yes, Total-Yes) ~ -1 + signal + signal:log(distance) + log(intensity):signal +
+     log(intensity):log(distance):signal, 
+  data = id8_91, family = binomial())
+```
+
+![](slides_files/figure-html/unnamed-chunk-30-1.png)&lt;!-- --&gt;
+]
+
+.panel[.panel-name[Estimates]
+
+```r
+Coefficients:
+                              Estimate Std. Error z value Pr(&gt;|z|)    
+signal                        5.615247   0.530489  10.585   &lt;2e-16 ***
+signal:log(distance)         -0.893241   0.079424 -11.246   &lt;2e-16 ***
+signal:log(intensity)         0.016951   0.057168   0.297    0.767    
+log(distance):log(intensity) -0.001084   0.002927  -0.370    0.711    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+```
+
+... what do we do about the other 27 participants of the study?
+]
+]
+
+---
+
+## Another two Participants
+
+.panelset[
+
+.panel[.panel-name[Data for 80_74]
+
+
+
+![](slides_files/figure-html/unnamed-chunk-33-1.png)&lt;!-- --&gt;
+This participant is quite a bit worse in the assessment of the height of B.
+]
+
+.panel[.panel-name[Model]
+
+```r
+logr80_74_dnum_inum &lt;- glm(
+  cbind(Yes, Total-Yes) ~ -1 + signal + signal:log(distance) + log(intensity):signal +
+     log(intensity):log(distance), 
+  data = id80_74, family = binomial())
+```
+
+![](slides_files/figure-html/unnamed-chunk-35-1.png)&lt;!-- --&gt;
+]
+
+.panel[.panel-name[Participant 97_60]
+
+
+![](slides_files/figure-html/unnamed-chunk-37-1.png)&lt;!-- --&gt;
+
+Generally, distance and intensity seem to have the similar relationships with the difference in height between rectangle B and A for the participants. 
+]
+
+]
+
+---
+
+# Logistic regression with random effects
+
+**Idea:** allow each participant to have their own slope of detection and their own PSE
+
+We will assume that these participant based values are normally distributed around the population mean (for PSE the population mean is set to 0).
+
+These random effects can be fitted in R using the function `glmer` of the package `lme4`
+
+
+
+
+```r
+library(lme4)
+
+logDI &lt;- glmer(
+  cbind(Yes, Total-Yes) ~ -1 + signal + signal:log(distance) + 
+    log(intensity):signal +
+   #  log(intensity):log(distance):signal +
+    (1 + signal| userID), 
+  data = bars, family = binomial())
+```
+
+---
+
+```
+## Generalized linear mixed model fit by maximum likelihood (Laplace
+##   Approximation) [glmerMod]
+##  Family: binomial  ( logit )
+## Formula: cbind(Yes, Total - Yes) ~ -1 + signal + signal:log(distance) +  
+##     log(intensity):signal + (1 + signal | userID)
+##    Data: bars
+## 
+##      AIC      BIC   logLik deviance df.resid 
+##  21888.2  21929.3 -10938.1  21876.2     6994 
+## 
+## Scaled residuals: 
+##     Min      1Q  Median      3Q     Max 
+## -8.0817 -0.7722 -0.0425  0.7288 23.8930 
+## 
+## Random effects:
+##  Groups Name        Variance Std.Dev. Corr
+##  userID (Intercept) 0.08173  0.2859       
+##         signal      0.05001  0.2236   0.11
+## Number of obs: 7000, groups:  userID, 28
+## 
+## Fixed effects:
+##                        Estimate Std. Error z value Pr(&gt;|z|)    
+## signal                 2.478475   0.058558  42.325  &lt; 2e-16 ***
+## signal:log(distance)  -0.338548   0.005308 -63.783  &lt; 2e-16 ***
+## signal:log(intensity) -0.041655   0.005153  -8.083 6.32e-16 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Correlation of Fixed Effects:
+##             signal sgnl:lg(d)
+## sgnl:lg(ds) -0.493           
+## sgnl:lg(nt) -0.432 -0.002
+```
+
+---
+
+# Population estimates
+
+
+JND depends on intensity (height of bar A) and distance between the bars:
+
+
+```r
+jnd &lt;- function(model, distance, intensity) {
+  log(3)/sum(fixef(model)*c(1,log(distance), log(intensity)))
+}
+
+jnd(logDI, 9, 50) 
+```
+
+```
+## [1] 0.6990166
+```
+
+Population based PSE is set to 0
+
+![](slides_files/figure-html/unnamed-chunk-42-1.png)&lt;!-- --&gt;
+
+
+---
+
+# Participants' values
+
+![](slides_files/figure-html/unnamed-chunk-43-1.png)&lt;!-- --&gt;
+
+
+```r
+head(ranef(logDI)$userID)
+```
+
+```
+##         (Intercept)     signal
+## 100_119 -0.13799830 -0.3246819
+## 102_133 -0.32586378 -0.2973895
+## 120_73   0.06157149 -0.2062552
+## 130_90  -0.80159333 -0.2499976
+## 135_83   0.08509154  0.1396461
+## 148_108  0.06869291 -0.2090149
+```
+
+---
+
+# Summary
+
+Overall population model tells us, that perception of differences between bars is influenced mostly by how far apart these bars are, and a bit how tall the bars are.
+
+Makes a good case for ordering of bars by height in a barchart (as long as the variable is not ordinal).
+
+Random effect models allow us 
+
+- to think of a participant as a random draw from a population. Think about implications for generalizing the model! 
+
+- to draw strength (more samples) across participants (intensity became significant).
+
+- to assess a participants' skill levels (subject-specific JNDs) and get an idea for the range of skills.
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
